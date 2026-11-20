@@ -28,6 +28,9 @@
 </section>
 
 <section id="game" class="hidden">
+  <div class="nav">
+    <button id="prev" class="navbtn" disabled aria-label="Pergunta anterior">← Anterior</button>
+  </div>
   <div class="hud">
     <span class="pill">Termo <b id="round">1</b>/16</span>
     <span class="pill">Pontos <b id="score">0</b></span>
@@ -39,7 +42,7 @@
     <div class="slots" id="slotsWrap">
       <input id="answer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Sua resposta">
     </div>
-    <p class="status" id="status"></p>
+    <p class="status" id="status" aria-live="polite"></p>
     <div class="row" id="actions">
       <button class="main" id="check">Conferir</button>
       <button id="hint">Dica</button>

@@ -20,6 +20,15 @@ const terms = [
 const el = id => document.getElementById(id)
 const clean = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z]/g, '').toUpperCase()
 
+function shuffle(arr) {
+  const a = arr.slice()
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 let order = []
 let idx = 0
 let score = 0
@@ -29,6 +38,10 @@ let wrong = 0
 let hints = 0
 let locked = false
 let missed = []
+let records = []
+let confettiFrame = null
+let confettiTimer = null
+let confettiResize = null
 
 const screens = ['start', 'game', 'end', 'guide']
 let current = 'start'
@@ -78,31 +91,34 @@ function bump(id) {
 }
 
 function startGame() {
-  order = terms.slice().sort(() => Math.random() - 0.5)
+  stopConfetti()
+  order = shuffle(terms)
   idx = 0
   score = 0
   streak = 0
   right = 0
   missed = []
+  records = order.map(() => ({wrong: 0, hints: 0, locked: false, correct: false, value: ''}))
   el('page').classList.remove('win')
   el('score').textContent = '0'
   el('streak').textContent = '0'
   show('game')
-  loadRound()
+  loadRound('next')
 }
 
-function loadRound() {
+function loadRound(direction) {
   const t = order[idx]
-  wrong = 0
-  hints = 0
-  locked = false
+  const rec = records[idx]
+  wrong = rec.wrong
+  hints = rec.hints
+  locked = rec.locked
   el('round').textContent = String(idx + 1)
   el('bar').style.width = (idx / order.length * 100) + '%'
   el('question').textContent = t.q
-  el('status').textContent = 'Termo com ' + t.a.length + ' letras. Clique nos quadrinhos e digite.'
   el('fb').classList.add('hidden')
-  el('actions').classList.remove('hidden')
-  el('hint').disabled = false
+  el('actions').classList.toggle('hidden', rec.locked)
+  el('hint').disabled = rec.locked || rec.hints >= 3
+  el('prev').disabled = idx === 0
   const wrap = el('slotsWrap')
   while (wrap.children.length > 1) wrap.removeChild(wrap.lastChild)
   t.a.split('').forEach(() => {
@@ -111,21 +127,31 @@ function loadRound() {
     wrap.appendChild(d)
   })
   const inp = el('answer')
-  inp.disabled = false
-  inp.value = ''
+  inp.disabled = rec.locked
+  inp.value = rec.value || ''
   inp.maxLength = t.a.length
   const card = el('card')
-  card.classList.remove('enter')
+  card.classList.remove('enter', 'enter-back')
   void card.offsetWidth
-  card.classList.add('enter')
+  card.classList.add(direction === 'back' ? 'enter-back' : 'enter')
   render()
-  inp.focus()
+  if (rec.locked) {
+    lock(rec.correct, t, false)
+    el('fbTitle').textContent = rec.correct ? 'Você já acertou este termo.' : 'Esse não foi. Veja a resposta:'
+  } else {
+    const status = []
+    if (rec.wrong > 0) status.push('Ainda não. Restam ' + (3 - rec.wrong) + ' tentativas.')
+    if (rec.hints > 0) status.push('Dica usada. Cada dica custa 2 pontos.')
+    el('status').textContent = status.length ? status.join(' ') : 'Termo com ' + t.a.length + ' letras. Clique nos quadrinhos e digite.'
+    inp.focus()
+  }
 }
 
 function render() {
   const inp = el('answer')
   const val = clean(inp.value)
   inp.value = val
+  if (records[idx]) records[idx].value = val
   const cells = el('slotsWrap').children
   order[idx].a.split('').forEach((_, i) => {
     const c = cells[i + 1]
@@ -141,8 +167,14 @@ function render() {
   })
 }
 
-function lock(good, t) {
+function lock(good, t, focusNext = true) {
   locked = true
+  const rec = records[idx]
+  if (rec) {
+    rec.locked = true
+    rec.correct = good
+    rec.value = clean(el('answer').value)
+  }
   el('answer').disabled = true
   el('actions').classList.add('hidden')
   const cells = el('slotsWrap').children
@@ -158,7 +190,7 @@ function lock(good, t) {
   fb.className = 'fb ' + (good ? 'good' : 'bad')
   el('fbText').textContent = t.n + '. No tabuleiro: ' + t.a + '.'
   el('next').textContent = idx === order.length - 1 ? 'Ver resultado' : 'Próximo'
-  el('next').focus()
+  if (focusNext) el('next').focus()
 }
 
 function check() {
@@ -172,7 +204,7 @@ function check() {
     const bonus = Math.min(streak - 1, 5)
     score += pts + bonus
     right++
-    if (right > 10) el('page').classList.add('win')
+    if (right > 9) el('page').classList.add('win')
     el('score').textContent = String(score)
     el('streak').textContent = String(streak)
     bump('score')
@@ -181,6 +213,7 @@ function check() {
     lock(true, t)
   } else {
     wrong++
+    if (records[idx]) records[idx].wrong = wrong
     const w = el('slotsWrap')
     w.classList.remove('shake')
     void w.offsetWidth
@@ -207,6 +240,7 @@ function hint() {
   if (locked || hints >= 3) return
   const t = order[idx]
   hints++
+  if (records[idx]) records[idx].hints = hints
   const have = clean(el('answer').value).length
   el('answer').value = t.a.slice(0, Math.min(t.a.length - 1, Math.max(hints, have + 1)))
   render()
@@ -215,12 +249,29 @@ function hint() {
   el('answer').focus()
 }
 
+function syncRound() {
+  const rec = records[idx]
+  if (!rec) return
+  rec.value = clean(el('answer').value)
+  rec.wrong = wrong
+  rec.hints = hints
+  rec.locked = locked
+}
+
+function goPrev() {
+  if (idx === 0) return
+  syncRound()
+  idx--
+  loadRound('back')
+}
+
 function next() {
+  syncRound()
   idx++
   if (idx >= order.length) {
     endGame()
   } else {
-    loadRound()
+    loadRound('next')
   }
 }
 
@@ -239,6 +290,89 @@ function endGame() {
   })
   el('missedBox').classList.toggle('hidden', missed.length === 0)
   show('end')
+  if (right > 9) launchConfetti()
+}
+
+function stopConfetti() {
+  if (confettiFrame) {
+    cancelAnimationFrame(confettiFrame)
+    confettiFrame = null
+  }
+  if (confettiTimer) {
+    clearTimeout(confettiTimer)
+    confettiTimer = null
+  }
+  if (confettiResize) {
+    window.removeEventListener('resize', confettiResize)
+    confettiResize = null
+  }
+  const canvas = document.getElementById('confetti')
+  if (canvas) canvas.remove()
+}
+
+function launchConfetti() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  stopConfetti()
+  const canvas = document.createElement('canvas')
+  canvas.id = 'confetti'
+  canvas.setAttribute('aria-hidden', 'true')
+  document.body.appendChild(canvas)
+  const ctx = canvas.getContext('2d')
+  let w = 0
+  let h = 0
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    w = window.innerWidth
+    h = window.innerHeight
+    canvas.width = w * dpr
+    canvas.height = h * dpr
+    canvas.style.width = w + 'px'
+    canvas.style.height = h + 'px'
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  }
+  resize()
+  confettiResize = resize
+  window.addEventListener('resize', resize)
+  const colors = ['#e6004e', '#ffb020', '#0f9d68', '#3488ff', '#9b5cff', '#ff7aad']
+  const pieces = Array.from({length: 180}, () => ({
+    x: Math.random() * w,
+    y: -20 - Math.random() * h * 0.6,
+    w: 5 + Math.random() * 8,
+    h: 8 + Math.random() * 10,
+    vx: (Math.random() - 0.5) * 2.2,
+    vy: 2.5 + Math.random() * 4,
+    rot: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    sway: Math.random() * Math.PI * 2
+  }))
+  const start = performance.now()
+  const frame = now => {
+    const elapsed = now - start
+    ctx.clearRect(0, 0, w, h)
+    pieces.forEach(p => {
+      p.x += p.vx + Math.sin(now / 450 + p.sway) * 0.7
+      p.y += p.vy
+      p.rot += p.vr
+      if (p.y > h + 40) {
+        p.y = -40
+        p.x = Math.random() * w
+      }
+      ctx.save()
+      ctx.translate(p.x, p.y)
+      ctx.rotate(p.rot)
+      ctx.fillStyle = p.color
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+      ctx.restore()
+    })
+    if (elapsed < 5500) {
+      confettiFrame = requestAnimationFrame(frame)
+    } else {
+      stopConfetti()
+    }
+  }
+  confettiFrame = requestAnimationFrame(frame)
+  confettiTimer = setTimeout(stopConfetti, 6500)
 }
 
 buildGuide()
@@ -250,6 +384,7 @@ el('check').addEventListener('click', check)
 el('hint').addEventListener('click', hint)
 el('skip').addEventListener('click', giveUp)
 el('next').addEventListener('click', next)
+el('prev').addEventListener('click', goPrev)
 el('answer').addEventListener('input', render)
 el('slotsWrap').addEventListener('click', () => el('answer').focus())
 document.addEventListener('keydown', e => {

@@ -19,7 +19,8 @@ Como jogar
 - Leia a pista e digite a resposta no campo invisível (cada letra aparece nos quadradinhos).
 - A resposta deve ser enviada sem acentos, sem espaços e em maiúsculas (o jogo faz a normalização automaticamente).
 - Você tem 3 tentativas por termo. Use "Dica" até 3 vezes (cada dica custa pontos). "Desistir" revela a resposta.
-- Ao final, você vê a pontuação, ranking e os termos que errou.
+- Use "← Anterior" para voltar à pergunta anterior. O progresso, as dicas e as tentativas de cada pergunta são preservados.
+- Ao final, você vê a pontuação, ranking e os termos que errou. Acertando 10 ou mais termos, uma chuva de confetes aparece no resultado.
 
 Onde estão os dados do jogo
 --------------------------
