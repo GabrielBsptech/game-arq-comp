@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tabuleiro de Arquitetura Computacional</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body id="page">
+<main>
+
+<header class="top">
+  <button id="back" class="hidden" aria-label="Voltar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    Voltar
+  </button>
+  <button id="info" class="icon" aria-label="Guia dos temas" title="Guia dos temas">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 11v6"/><circle cx="12" cy="7.3" r=".6" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<section id="start">
+  <div class="chip">CPU</div>
+  <h1>Tabuleiro de Arquitetura Computacional</h1>
+  <p>Leia a pista e digite o termo do jeito que ele aparece no tabuleiro, sem espaços e sem acento. São 16 termos, de CPU a quad core. Você tem 3 tentativas por termo e pode pedir até 3 dicas.</p>
+  <button class="main" id="play">Começar</button>
+</section>
+
+<section id="game" class="hidden">
+  <div class="hud">
+    <span class="pill">Termo <b id="round">1</b>/16</span>
+    <span class="pill">Pontos <b id="score">0</b></span>
+    <span class="pill">Sequência <b id="streak">0</b></span>
+  </div>
+  <div class="track"><div id="bar"></div></div>
+  <div class="card" id="card">
+    <p class="q" id="question"></p>
+    <div class="slots" id="slotsWrap">
+      <input id="answer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Sua resposta">
+    </div>
+    <p class="status" id="status"></p>
+    <div class="row" id="actions">
+      <button class="main" id="check">Conferir</button>
+      <button id="hint">Dica</button>
+      <button id="skip">Desistir</button>
+    </div>
+    <div class="fb hidden" id="fb">
+      <h3 id="fbTitle"></h3>
+      <p id="fbText"></p>
+      <button class="main" id="next">Próximo</button>
+    </div>
+  </div>
+</section>
+
+<section id="end" class="hidden">
+  <h1 id="rank"></h1>
+  <div class="big" id="final"></div>
+  <p id="summary"></p>
+  <div id="missedBox" class="hidden">
+    <p>Para revisar:</p>
+    <ul id="missed"></ul>
+  </div>
+  <button class="main" id="again">Jogar de novo</button>
+</section>
+
+<section id="guide" class="hidden">
+  <h1>Guia dos temas</h1>
+  <p>Toque em um tema para ver o resumo. Atenção: aqui estão as respostas do jogo.</p>
+  <div id="guideList"></div>
+</section>
+
+</main>
+<script src="script.js"></script>
+</body>
+</html>
