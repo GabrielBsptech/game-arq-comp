@@ -534,6 +534,19 @@ body.win {
     --bg: #5CE65C
 }
 
+footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 2px solid var(--line);
+    text-align: center;
+    font-size: 13px;
+    color: var(--mute)
+}
+
+footer b {
+    color: var(--ink)
+}
+
 #confetti {
     position: fixed;
     inset: 0;

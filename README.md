@@ -1,56 +1,45 @@
-Game Comp - Arquitetura Computacional 
-=====================================
+# Game Comp — Arquitetura Computacional
 
-Resumo
-------
-Pequeno jogo/quiz em HTML, CSS e JavaScript que apresenta 16 termos de arquitetura computacional. Cada rodada mostra uma pista; o jogador deve digitar o termo exatamente como aparece no "tabuleiro" (sem espaços e sem acentos). Há 3 tentativas por termo e até 3 dicas disponíveis.
+Quiz em HTML, CSS e JavaScript com 16 termos de arquitetura de computadores.
 
-Como rodar (rápido)
--------------------
-1. Abra o arquivo `index.html` no seu navegador (duplo clique ou arraste para o navegador).
-2. Se preferir um servidor local (recomendado para desenvolvimento):
+## Como rodar
 
-   - Com Python instalado: `python -m http.server 8000` e abra `http://localhost:8000`.
-   - Ou use a extensão Live Server do VSCode.
+Abra o `index.html` no navegador. Pronto.
 
-Como jogar
------------
-- Escolha o nível: "Fácil · Quiz" (pista + resposta), "Médio · Anagrama" (desembaralhe as letras) ou "Difícil · 5s" (anagrama com apenas 5 segundos por termo).
-- Leia a pista e digite a resposta no campo invisível (cada letra aparece nos quadradinhos).
-- A resposta deve ser enviada sem acentos, sem espaços e em maiúsculas (o jogo faz a normalização automaticamente).
-- Você tem 3 tentativas por termo. Use "Dica" até 3 vezes (cada dica custa pontos). "Desistir" revela a resposta.
-- Use "← Anterior" para voltar à pergunta anterior. O progresso, as dicas e as tentativas de cada pergunta são preservados.
-- Ao final, você vê a pontuação, ranking e os termos que errou. Acertando 10 ou mais termos, uma chuva de confetes aparece no resultado.
+## Níveis
 
-Onde estão os dados do jogo
---------------------------
-- `script.js` contém a lista de termos na variável `terms` (vetor de objetos). Cada objeto tem:
-  - `a`: resposta usada no tabuleiro (sem espaços/sem acento, em maiúsculas)
-  - `r`: resumo curto (usado no guia)
-  - `n`: nome legível (usado no feedback)
-  - `q`: pista / pergunta exibida ao jogador
+- **Fácil · Quiz**: leia a pista e digite a resposta.
+- **Médio · Anagrama**: desembaralhe as letras.
+- **Difícil · 5s**: anagrama com 5 segundos por termo.
 
-Exemplo de entrada em `script.js`:
+## Como jogar
 
-  {a:'CPU', r:'Executa as instruções dos programas...', n:'CPU, a Unidade Central de Processamento', q:'É o “cérebro” do computador...'}
+- Digite a resposta sem espaços e sem acentos (o jogo ajusta sozinho).
+- Você tem 3 tentativas por termo e até 3 dicas.
+- "Desistir" revela a resposta.
+- "← Anterior" volta para a pergunta anterior.
+- Ao final aparecem a pontuação, o ranking e os erros.
+- Com 200 pontos você ganha o troféu "Computador Humano" com confetes.
 
-Personalizar / editar
----------------------
-- Para adicionar, remover ou alterar termos, edite `script.js` no array `terms`.
-- Se quiser aceitar espaços ou caracteres diferentes, ajuste a função `clean()` em `script.js` (ela normaliza a entrada removendo acentos e caracteres não alfabéticos).
-- Estilização: altere `style.css` para modificar cores, tamanhos e layout.
-- Comportamento do jogo (pontos, número de tentativas, dicas) está em `script.js` nas funções `check()`, `hint()` e constantes iniciais.
+## Arquivos
 
-Estrutura dos arquivos
----------------------
-- index.html — interface e marcação
-- style.css — estilos
-- script.js — lógica do jogo e dados (termos)
+- `index.html` — telas e estrutura.
+- `style.css` — visual.
+- `script.js` — lógica e lista de termos.
 
-Dicas rápidas para desenvolvimento
-----------------------------------
-- Abra o console do navegador (F12) para ver erros e mensagens durante o desenvolvimento.
-- Use Live Server ou `python -m http.server` para evitar problemas de CORS/recursos quando editar localmente.
+## Editar os termos
+
+Os termos ficam em `script.js`, no array `terms`. Cada item tem:
+
+- `a`: resposta (maiúscula, sem espaço e sem acento).
+- `r`: resumo curto usado nas dicas.
+- `n`: nome completo usado no feedback.
+- `q`: pista mostrada no modo fácil.
+
+Exemplo:
+
+```js
+{a:'CPU', r:'Executa as instruções dos programas.', n:'CPU, a Unidade Central de Processamento', q:'É o cérebro do computador...'}
+```
 
 
-Bom jogo!
