@@ -14,8 +14,8 @@ Como rodar (rápido)
    - Ou use a extensão Live Server do VSCode.
 
 Como jogar
-------------
-- Clique em "Começar".
+-----------
+- Escolha o nível: "Fácil · Quiz" (pista + resposta) ou "Difícil · Anagrama" (desembaralhe as letras para descobrir o termo).
 - Leia a pista e digite a resposta no campo invisível (cada letra aparece nos quadradinhos).
 - A resposta deve ser enviada sem acentos, sem espaços e em maiúsculas (o jogo faz a normalização automaticamente).
 - Você tem 3 tentativas por termo. Use "Dica" até 3 vezes (cada dica custa pontos). "Desistir" revela a resposta.

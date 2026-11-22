@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tabuleiro de Arquitetura Computacional</title>
+<title>Game Comp</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -22,9 +22,13 @@
 
 <section id="start">
   <div class="chip">CPU</div>
-  <h1>Tabuleiro de Arquitetura Computacional</h1>
+  <h1>Bem-vindo ao Game Comp</h1>
   <p>Leia a pista e digite o termo do jeito que ele aparece no tabuleiro, sem espaços e sem acento. São 16 termos, de CPU a quad core. Você tem 3 tentativas por termo e pode pedir até 3 dicas.</p>
-  <button class="main" id="play">Começar</button>
+  <p>Escolha o nível: no <b>fácil</b> você recebe a pista. No <b>difícil</b> você precisa desembaralhar as letras para descobrir a palavra.</p>
+  <div class="modes">
+    <button class="main" id="playEasy">Fácil · Quiz</button>
+    <button class="hard" id="playHard">Difícil · Anagrama</button>
+  </div>
 </section>
 
 <section id="game" class="hidden">
@@ -32,6 +36,7 @@
     <button id="prev" class="navbtn" disabled aria-label="Pergunta anterior">← Anterior</button>
   </div>
   <div class="hud">
+    <span class="pill">Modo <b id="modeLabel">Fácil</b></span>
     <span class="pill">Termo <b id="round">1</b>/16</span>
     <span class="pill">Pontos <b id="score">0</b></span>
     <span class="pill">Sequência <b id="streak">0</b></span>
@@ -39,6 +44,7 @@
   <div class="track"><div id="bar"></div></div>
   <div class="card" id="card">
     <p class="q" id="question"></p>
+    <div class="scramble hidden" id="scramble" aria-label="Letras embaralhadas"></div>
     <div class="slots" id="slotsWrap">
       <input id="answer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Sua resposta">
     </div>

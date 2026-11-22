@@ -29,6 +29,16 @@ function shuffle(arr) {
   return a
 }
 
+function scrambleWord(word) {
+  const letters = word.split('')
+  if (letters.length < 2) return word
+  let out = shuffle(letters).join('')
+  let guard = 0
+  while (out === word && guard++ < 20) out = shuffle(letters).join('')
+  return out
+}
+
+let mode = 'easy'
 let order = []
 let idx = 0
 let score = 0
@@ -90,7 +100,8 @@ function bump(id) {
   e.classList.add('bump')
 }
 
-function startGame() {
+function startGame(m) {
+  if (m) mode = m
   stopConfetti()
   order = shuffle(terms)
   idx = 0
@@ -98,10 +109,11 @@ function startGame() {
   streak = 0
   right = 0
   missed = []
-  records = order.map(() => ({wrong: 0, hints: 0, locked: false, correct: false, value: ''}))
+  records = order.map(t => ({wrong: 0, hints: 0, locked: false, correct: false, value: '', scramble: scrambleWord(t.a)}))
   el('page').classList.remove('win')
   el('score').textContent = '0'
   el('streak').textContent = '0'
+  el('modeLabel').textContent = mode === 'hard' ? 'Difícil' : 'Fácil'
   show('game')
   loadRound('next')
 }
@@ -114,7 +126,14 @@ function loadRound(direction) {
   locked = rec.locked
   el('round').textContent = String(idx + 1)
   el('bar').style.width = (idx / order.length * 100) + '%'
-  el('question').textContent = t.q
+  if (mode === 'hard') {
+    el('question').textContent = 'Desembaralhe as letras e descubra o termo de arquitetura computacional.'
+    el('scramble').classList.remove('hidden')
+    renderScramble()
+  } else {
+    el('question').textContent = t.q
+    el('scramble').classList.add('hidden')
+  }
   el('fb').classList.add('hidden')
   el('actions').classList.toggle('hidden', rec.locked)
   el('hint').disabled = rec.locked || rec.hints >= 3
@@ -142,7 +161,9 @@ function loadRound(direction) {
     const status = []
     if (rec.wrong > 0) status.push('Ainda não. Restam ' + (3 - rec.wrong) + ' tentativas.')
     if (rec.hints > 0) status.push('Dica usada. Cada dica custa 2 pontos.')
-    el('status').textContent = status.length ? status.join(' ') : 'Termo com ' + t.a.length + ' letras. Clique nos quadrinhos e digite.'
+    if (mode === 'hard' && rec.hints > 0) status.push('Dica: ' + t.r)
+    const base = mode === 'hard' ? 'Termo com ' + t.a.length + ' letras embaralhadas. Digite a palavra certa.' : 'Termo com ' + t.a.length + ' letras. Clique nos quadrinhos e digite.'
+    el('status').textContent = status.length ? status.join(' ') : base
     inp.focus()
   }
 }
@@ -164,6 +185,19 @@ function render() {
       void c.offsetWidth
       c.style.animation = ''
     }
+  })
+}
+
+function renderScramble() {
+  const box = el('scramble')
+  const rec = records[idx]
+  if (!box || !rec) return
+  while (box.firstChild) box.removeChild(box.firstChild)
+  rec.scramble.split('').forEach(ch => {
+    const d = document.createElement('span')
+    d.className = 'scramble-letter'
+    d.textContent = ch
+    box.appendChild(d)
   })
 }
 
@@ -241,10 +275,15 @@ function hint() {
   const t = order[idx]
   hints++
   if (records[idx]) records[idx].hints = hints
-  const have = clean(el('answer').value).length
-  el('answer').value = t.a.slice(0, Math.min(t.a.length - 1, Math.max(hints, have + 1)))
-  render()
-  el('status').textContent = 'Dica usada. Cada dica custa 2 pontos.'
+  if (mode === 'hard' && hints === 1) {
+    el('status').textContent = 'Dica: ' + t.r
+  } else {
+    const reveal = mode === 'hard' ? hints - 1 : hints
+    const have = clean(el('answer').value).length
+    el('answer').value = t.a.slice(0, Math.min(t.a.length - 1, Math.max(reveal, have + 1)))
+    render()
+    el('status').textContent = 'Dica usada. Cada dica custa 2 pontos.'
+  }
   if (hints >= 3) el('hint').disabled = true
   el('answer').focus()
 }
@@ -376,10 +415,11 @@ function launchConfetti() {
 }
 
 buildGuide()
-el('play').addEventListener('click', startGame)
+el('playEasy').addEventListener('click', () => startGame('easy'))
+el('playHard').addEventListener('click', () => startGame('hard'))
 el('back').addEventListener('click', goBack)
 el('info').addEventListener('click', openGuide)
-el('again').addEventListener('click', startGame)
+el('again').addEventListener('click', () => startGame())
 el('check').addEventListener('click', check)
 el('hint').addEventListener('click', hint)
 el('skip').addEventListener('click', giveUp)
