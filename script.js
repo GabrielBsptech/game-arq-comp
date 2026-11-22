@@ -52,6 +52,8 @@ let records = []
 let confettiFrame = null
 let confettiTimer = null
 let confettiResize = null
+let trophyTimer = null
+let trophyShown = false
 
 const screens = ['start', 'game', 'end', 'guide']
 let current = 'start'
@@ -75,6 +77,8 @@ function goBack() {
     show(previous)
     if (previous === 'game' && !locked) el('answer').focus()
   } else {
+    el('page').classList.remove('win')
+    hideTrophy()
     show('start')
   }
 }
@@ -103,6 +107,8 @@ function bump(id) {
 function startGame(m) {
   if (m) mode = m
   stopConfetti()
+  hideTrophy()
+  trophyShown = false
   order = shuffle(terms)
   idx = 0
   score = 0
@@ -243,6 +249,10 @@ function check() {
     el('streak').textContent = String(streak)
     bump('score')
     bump('streak')
+    if (score >= 200 && !trophyShown) {
+      trophyShown = true
+      celebrateTrophy()
+    }
     el('fbTitle').textContent = 'Acertou! +' + (pts + bonus) + ' pontos' + (bonus ? ' (bônus de sequência: ' + bonus + ')' : '')
     lock(true, t)
   } else {
@@ -330,6 +340,22 @@ function endGame() {
   el('missedBox').classList.toggle('hidden', missed.length === 0)
   show('end')
   if (right > 9) launchConfetti()
+}
+
+function hideTrophy() {
+  if (trophyTimer) {
+    clearTimeout(trophyTimer)
+    trophyTimer = null
+  }
+  el('trophy').classList.add('hidden')
+}
+
+function celebrateTrophy() {
+  launchConfetti()
+  const t = el('trophy')
+  t.classList.remove('hidden')
+  if (trophyTimer) clearTimeout(trophyTimer)
+  trophyTimer = setTimeout(hideTrophy, 7000)
 }
 
 function stopConfetti() {

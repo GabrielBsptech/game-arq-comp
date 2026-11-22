@@ -524,3 +524,56 @@ body.win {
     pointer-events: none;
     z-index: 9999
 }
+
+#trophy {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    pointer-events: none;
+    z-index: 10000
+}
+
+.trophy-card {
+    background: var(--card);
+    border: 3px solid var(--acc);
+    border-radius: 20px;
+    padding: 24px 30px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+    animation: trophyIn .6s cubic-bezier(.2, 1.4, .4, 1) both
+}
+
+.trophy-svg {
+    width: clamp(96px, 26vw, 140px);
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+    animation: trophyBob 1.6s ease-in-out infinite
+}
+
+.trophy-title {
+    font: 800 clamp(18px, 4.5vw, 26px) 'Sora', system-ui, sans-serif;
+    color: var(--ink)
+}
+
+.trophy-sub {
+    margin-top: 4px;
+    font: 800 16px 'JetBrains Mono', monospace;
+    color: var(--acc)
+}
+
+@keyframes trophyIn {
+    from {
+        opacity: 0;
+        transform: scale(.6) translateY(20px)
+    }
+}
+
+@keyframes trophyBob {
+    50% {
+        transform: translateY(-6px) rotate(-2deg)
+    }
+}
