@@ -210,6 +210,24 @@ button:disabled {
     font-family: 'JetBrains Mono', monospace
 }
 
+#timerPill {
+    border-color: var(--acc);
+    color: var(--acc)
+}
+
+#timerPill.danger {
+    background: var(--bad);
+    border-color: var(--bad);
+    color: #fff;
+    animation: pulse .5s infinite alternate
+}
+
+@keyframes pulse {
+    to {
+        transform: scale(1.08)
+    }
+}
+
 .bump {
     animation: bump .35s
 }

@@ -54,6 +54,9 @@ let confettiTimer = null
 let confettiResize = null
 let trophyTimer = null
 let trophyShown = false
+let timerId = null
+let timerStart = 0
+let timerDeadline = 0
 
 const screens = ['start', 'game', 'end', 'guide']
 let current = 'start'
@@ -68,14 +71,19 @@ function show(id) {
 
 function openGuide() {
   previous = current
+  stopTimer()
   show('guide')
   window.scrollTo(0, 0)
 }
 
 function goBack() {
+  stopTimer()
   if (current === 'guide') {
     show(previous)
-    if (previous === 'game' && !locked) el('answer').focus()
+    if (previous === 'game' && !locked) {
+      el('answer').focus()
+      if (mode === 'hard') startTimer()
+    }
   } else {
     el('page').classList.remove('win')
     hideTrophy()
@@ -119,7 +127,8 @@ function startGame(m) {
   el('page').classList.remove('win')
   el('score').textContent = '0'
   el('streak').textContent = '0'
-  el('modeLabel').textContent = mode === 'hard' ? 'Difícil' : 'Fácil'
+  el('modeLabel').textContent = mode === 'hard' ? 'Difícil' : mode === 'medium' ? 'Médio' : 'Fácil'
+  el('timerPill').classList.toggle('hidden', mode !== 'hard')
   show('game')
   loadRound('next')
 }
@@ -132,7 +141,7 @@ function loadRound(direction) {
   locked = rec.locked
   el('round').textContent = String(idx + 1)
   el('bar').style.width = (idx / order.length * 100) + '%'
-  if (mode === 'hard') {
+  if (mode !== 'easy') {
     el('question').textContent = 'Desembaralhe as letras e descubra o termo de arquitetura computacional.'
     el('scramble').classList.remove('hidden')
     renderScramble()
@@ -167,11 +176,13 @@ function loadRound(direction) {
     const status = []
     if (rec.wrong > 0) status.push('Ainda não. Restam ' + (3 - rec.wrong) + ' tentativas.')
     if (rec.hints > 0) status.push('Dica usada. Cada dica custa 2 pontos.')
-    if (mode === 'hard' && rec.hints > 0) status.push('Dica: ' + t.r)
-    const base = mode === 'hard' ? 'Termo com ' + t.a.length + ' letras embaralhadas. Digite a palavra certa.' : 'Termo com ' + t.a.length + ' letras. Clique nos quadrinhos e digite.'
+    if (mode !== 'easy' && rec.hints > 0) status.push('Dica: ' + t.r)
+    const base = mode !== 'easy' ? 'Termo com ' + t.a.length + ' letras embaralhadas. Digite a palavra certa.' : 'Termo com ' + t.a.length + ' letras. Clique nos quadrinhos e digite.'
     el('status').textContent = status.length ? status.join(' ') : base
     inp.focus()
   }
+  if (mode === 'hard' && !rec.locked) startTimer()
+  else stopTimer()
 }
 
 function render() {
@@ -207,7 +218,47 @@ function renderScramble() {
   })
 }
 
+function startTimer() {
+  stopTimer()
+  if (mode !== 'hard' || locked) return
+  timerStart = Date.now()
+  timerDeadline = timerStart + 5000
+  updateTimer()
+  timerId = setInterval(updateTimer, 100)
+}
+
+function updateTimer() {
+  const left = Math.max(0, timerDeadline - Date.now())
+  el('timer').textContent = (left / 1000).toFixed(1)
+  el('timerPill').classList.toggle('danger', left <= 2000)
+  if (left <= 0) {
+    stopTimer()
+    timeUp()
+  }
+}
+
+function stopTimer() {
+  if (timerId) {
+    clearInterval(timerId)
+    timerId = null
+  }
+  const pill = el('timerPill')
+  if (pill) pill.classList.remove('danger')
+}
+
+function timeUp() {
+  if (locked) return
+  const t = order[idx]
+  streak = 0
+  el('streak').textContent = '0'
+  missed.push(t)
+  el('timer').textContent = '0.0'
+  el('fbTitle').textContent = 'Perdeu, tem que pensar mais rápido!'
+  lock(false, t)
+}
+
 function lock(good, t, focusNext = true) {
+  stopTimer()
   locked = true
   const rec = records[idx]
   if (rec) {
@@ -253,7 +304,19 @@ function check() {
       trophyShown = true
       celebrateTrophy()
     }
-    el('fbTitle').textContent = 'Acertou! +' + (pts + bonus) + ' pontos' + (bonus ? ' (bônus de sequência: ' + bonus + ')' : '')
+    let speedMsg = ''
+    if (mode === 'hard') {
+      const now = Date.now()
+      const elapsed = now - timerStart
+      const left = timerDeadline - now
+      if (elapsed < 1000) speedMsg = 'Super computador está entre nós!'
+      else if (left <= 1000) speedMsg = 'Por pouco que não consegue!'
+    }
+    if (speedMsg) {
+      el('fbTitle').textContent = speedMsg + ' +' + (pts + bonus) + ' pontos'
+    } else {
+      el('fbTitle').textContent = 'Acertou! +' + (pts + bonus) + ' pontos' + (bonus ? ' (bônus de sequência: ' + bonus + ')' : '')
+    }
     lock(true, t)
   } else {
     wrong++
@@ -285,10 +348,10 @@ function hint() {
   const t = order[idx]
   hints++
   if (records[idx]) records[idx].hints = hints
-  if (mode === 'hard' && hints === 1) {
+  if (mode !== 'easy' && hints === 1) {
     el('status').textContent = 'Dica: ' + t.r
   } else {
-    const reveal = mode === 'hard' ? hints - 1 : hints
+    const reveal = mode !== 'easy' ? hints - 1 : hints
     const have = clean(el('answer').value).length
     el('answer').value = t.a.slice(0, Math.min(t.a.length - 1, Math.max(reveal, have + 1)))
     render()
@@ -309,12 +372,14 @@ function syncRound() {
 
 function goPrev() {
   if (idx === 0) return
+  stopTimer()
   syncRound()
   idx--
   loadRound('back')
 }
 
 function next() {
+  stopTimer()
   syncRound()
   idx++
   if (idx >= order.length) {
@@ -442,6 +507,7 @@ function launchConfetti() {
 
 buildGuide()
 el('playEasy').addEventListener('click', () => startGame('easy'))
+el('playMedium').addEventListener('click', () => startGame('medium'))
 el('playHard').addEventListener('click', () => startGame('hard'))
 el('back').addEventListener('click', goBack)
 el('info').addEventListener('click', openGuide)

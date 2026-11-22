@@ -24,10 +24,11 @@
   <div class="chip">CPU</div>
   <h1>Bem-vindo ao Game Comp</h1>
   <p>Leia a pista e digite o termo do jeito que ele aparece no tabuleiro, sem espaços e sem acento. São 16 termos, de CPU a quad core. Você tem 3 tentativas por termo e pode pedir até 3 dicas.</p>
-  <p>Escolha o nível: no <b>fácil</b> você recebe a pista. No <b>difícil</b> você precisa desembaralhar as letras para descobrir a palavra.</p>
+  <p>Escolha o nível: no <b>fácil</b> você recebe a pista. No <b>médio</b> você desembaralha as letras para descobrir a palavra. No <b>difícil</b> você tem só 5 segundos por termo para desembaralhar e responder.</p>
   <div class="modes">
     <button class="main" id="playEasy">Fácil · Quiz</button>
-    <button class="hard" id="playHard">Difícil · Anagrama</button>
+    <button id="playMedium">Médio · Anagrama</button>
+    <button class="hard" id="playHard">Difícil · 5s</button>
   </div>
 </section>
 
@@ -37,6 +38,7 @@
   </div>
   <div class="hud">
     <span class="pill">Modo <b id="modeLabel">Fácil</b></span>
+    <span class="pill hidden" id="timerPill">Tempo <b id="timer">5</b>s</span>
     <span class="pill">Termo <b id="round">1</b>/16</span>
     <span class="pill">Pontos <b id="score">0</b></span>
     <span class="pill">Sequência <b id="streak">0</b></span>
