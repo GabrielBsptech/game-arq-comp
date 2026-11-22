@@ -66,7 +66,7 @@ function show(id) {
   current = id
   screens.forEach(s => el(s).classList.toggle('hidden', s !== id))
   el('back').classList.toggle('hidden', id === 'start')
-  el('info').classList.toggle('hidden', id === 'guide')
+  el('info').classList.toggle('hidden', id !== 'start')
 }
 
 function openGuide() {
@@ -181,8 +181,12 @@ function loadRound(direction) {
     el('status').textContent = status.length ? status.join(' ') : base
     inp.focus()
   }
-  if (mode === 'hard' && !rec.locked) startTimer()
-  else stopTimer()
+  if (mode === 'hard' && !rec.locked) {
+    startTimer()
+  } else {
+    stopTimer()
+    if (mode === 'hard') el('timer').textContent = '0.0'
+  }
 }
 
 function render() {

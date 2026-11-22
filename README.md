@@ -1,4 +1,4 @@
-Tabuleiro de Arquitetura Computacional
+Game Comp - Arquitetura Computacional 
 =====================================
 
 Resumo
@@ -52,12 +52,5 @@ Dicas rápidas para desenvolvimento
 - Abra o console do navegador (F12) para ver erros e mensagens durante o desenvolvimento.
 - Use Live Server ou `python -m http.server` para evitar problemas de CORS/recursos quando editar localmente.
 
-Contribuição
------------
-Pull requests e melhorias são bem-vindas. Para mudanças rápidas, modificar o array `terms` já altera o conteúdo do jogo.
-
-Licença
--------
-Sem licença explícita — use como preferir (se for publicar, adicione uma licença adequada).
 
 Bom jogo!
